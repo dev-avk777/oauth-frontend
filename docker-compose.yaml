@@ -2,5 +2,5 @@ services:
   frontend:
     build: .
     ports:
-      - "3006:3006"
-    command: pnpm exec vite preview --host --port 3006
+      - "3007:3007"
+    command: pnpm exec vite preview --host --port 3007

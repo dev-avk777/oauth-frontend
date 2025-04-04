@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 
 type User = {
   id: string
@@ -27,13 +27,13 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext)
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID"
-const REDIRECT_URI = `https://tokenswallet.ru/callback`
-const SCOPE = "email profile"
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'
+const REDIRECT_URI = 'https://tokenswallet.ru:3007/callback'
+const SCOPE = 'email profile'
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem("auth_user")
+    const savedUser = localStorage.getItem('auth_user')
     return savedUser ? JSON.parse(savedUser) : null
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -48,24 +48,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const hash = window.location.hash.substring(1)
       const params = new URLSearchParams(hash)
-      const accessToken = params.get("access_token")
+      const accessToken = params.get('access_token')
 
       if (!accessToken) {
-        console.error("No access token found")
+        console.error('No access token found')
         setIsLoading(false)
         return false
       }
 
-
       //here backend call?
-      const response = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
 
       if (!response.ok) {
-        throw new Error("Failed to fetch user data")
+        throw new Error('Failed to fetch user data')
       }
 
       const userData = await response.json()
@@ -78,12 +77,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setUser(user)
-      localStorage.setItem("auth_user", JSON.stringify(user))
+      localStorage.setItem('auth_user', JSON.stringify(user))
 
       setIsLoading(false)
       return true
     } catch (error) {
-      console.error("Authentication error:", error)
+      console.error('Authentication error:', error)
       setIsLoading(false)
       return false
     }
@@ -91,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     setUser(null)
-    localStorage.removeItem("auth_user")
+    localStorage.removeItem('auth_user')
   }, [])
 
   return (

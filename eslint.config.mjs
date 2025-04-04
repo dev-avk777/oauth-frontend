@@ -3,7 +3,6 @@ import tsParser from '@typescript-eslint/parser'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
-import nextPlugin from '@next/eslint-plugin-next'
 import { FlatCompat } from '@eslint/eslintrc'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -18,7 +17,7 @@ const compat = new FlatCompat({
 const config = [
   js.configs.recommended,
   ...compat.config({
-    ignorePatterns: ['.next/**', 'node_modules/**', 'public/**', 'build/**', 'dist/**'],
+    ignorePatterns: ['node_modules/**', 'public/**', 'build/**', 'dist/**'],
   }),
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
@@ -26,7 +25,6 @@ const config = [
       '@typescript-eslint': tsPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
-      '@next/next': nextPlugin,
     },
     languageOptions: {
       parser: tsParser,
@@ -42,7 +40,6 @@ const config = [
       ...tsPlugin.configs.recommended.rules,
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
-      ...nextPlugin.configs.recommended.rules,
       // React rules
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
@@ -97,7 +94,6 @@ const config = [
       },
     },
   },
-  ...compat.extends('next/core-web-vitals'),
 ]
 
 export default config
