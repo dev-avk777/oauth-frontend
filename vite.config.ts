@@ -15,6 +15,6 @@ export default defineConfig({
         },
     },
     preview: {
-        'allowedHosts': ['wallet.aucburg.com']
+        'allowedHosts': ['tokenswallet.ru']
     }
 })

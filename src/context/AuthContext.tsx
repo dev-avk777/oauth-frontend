@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID"
-const REDIRECT_URI = `https://wallet.aucburg.com/callback`
+const REDIRECT_URI = `https://tokenswallet.ru/callback`
 const SCOPE = "email profile"
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return false
       }
 
-   
+
       //here backend call?
       const response = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
         headers: {
@@ -100,4 +100,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   )
 }
-
