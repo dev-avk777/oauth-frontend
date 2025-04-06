@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # База данных для Umami
+  db:
+    image: postgres:14
+    container_name: umami-db
+    restart: always
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: mysecurepassword
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"          # Проброс порта для доступа извне
+    networks:
+      - webnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./test/oauth-frontend
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    ports:
+      - "3006:3006"
+    command: pnpm exec vite preview --host --port 3006
+    networks:
+      - webnet
+
+  # OAuth Frontend приложение
+  oauth-frontend:
+    image: registry.gitlab.com/store_images/docker-images/oauth-frontend:latest
+    container_name: oauth-frontend
+    restart: always
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=production
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+    networks:
+      - webnet
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3007/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Сервис Umami
+  umami:
+    image: docker.umami.is/umami-software/umami:postgresql-latest
+    container_name: umami-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:mysecurepassword@db:5432/umami
+    depends_on:
+      - db
+    networks:
+      - webnet
+
+  # Сервис pool-creator (использует образ из GitLab Container Registry)
+  pool-creator:
+    image: registry.gitlab.com/store_images/docker-images/my-pool-creator:latest
+    container_name: pool-creator-app
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - INCH_API_KEY=${INCH_API_KEY}
+    networks:
+      - webnet
+
+  # Nginx – обратный прокси для Umami и Pool-creator
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      #- ./test/nginx-frontend.conf:/etc/nginx/conf.d/nginx-frontend.conf:ro
+      #- ./test/nginx-backend.conf:/etc/nginx/conf.d/nginx-backend.conf:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - umami
+      - pool-creator
+      - oauth-frontend
+    networks:
+      - webnet
+    labels:
+      com.example.project: "my-project"
+      com.example.environment: "production"
+
+  # Certbot для автоматического обновления SSL-сертификатов
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"
+    networks:
+      - webnet
+
+networks:
+  webnet:
+
+volumes:
+  umami-db-data:
