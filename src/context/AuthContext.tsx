@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'
-const REDIRECT_URI = 'https://tokenswallet.ru:3007/callback'
+const REDIRECT_URI = 'https://tokenswallet.ru/callback'
 const SCOPE = 'email profile'
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {

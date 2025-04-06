@@ -43,7 +43,7 @@ interface UserInfoData {
 const getEnvVar = (key: string, fallback = ''): string => import.meta.env[key] || fallback
 
 // Base URL for redirects
-const BASE_URL = 'https://tokenswallet.ru:3007'
+const BASE_URL = 'https://tokenswallet.ru'
 
 /**
  * Google OAuth Provider
