@@ -17,12 +17,26 @@ export interface OAuthProvider {
   scope: string
   responseType: 'token' | 'code'
   extractToken: (hash: string) => string | null
-  processUserInfo: (data: any) => {
+  processUserInfo: (data: UserInfoData) => {
     id: string
     name: string
     email: string
     picture: string
   } | null
+}
+
+// Определяем интерфейс для данных пользователя, возвращаемых API
+interface UserInfoData {
+  id?: string
+  name?: string
+  displayName?: string
+  email?: string
+  mail?: string
+  userPrincipalName?: string
+  picture?: string
+  avatar_url?: string
+  login?: string
+  [key: string]: unknown
 }
 
 // Environment variable helper with fallback
@@ -48,16 +62,16 @@ export const googleProvider: OAuthProvider = {
     const params = new URLSearchParams(hash)
     return params.get('access_token')
   },
-  processUserInfo: (data: any) => {
+  processUserInfo: (data: UserInfoData) => {
     if (!data) {
       return null
     }
 
     return {
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      picture: data.picture,
+      id: data.id || '',
+      name: data.name || '',
+      email: data.email || '',
+      picture: data.picture || '',
     }
   },
 }
@@ -83,16 +97,16 @@ export const githubProvider: OAuthProvider = {
     const params = new URLSearchParams(hash)
     return params.get('code')
   },
-  processUserInfo: (data: any) => {
+  processUserInfo: (data: UserInfoData) => {
     if (!data) {
       return null
     }
 
     return {
-      id: data.id.toString(),
-      name: data.name || data.login,
+      id: data.id ? data.id.toString() : '',
+      name: data.name || data.login || '',
       email: data.email || '', // May require additional API call for private emails
-      picture: data.avatar_url,
+      picture: data.avatar_url || '',
     }
   },
 }
@@ -118,15 +132,15 @@ export const microsoftProvider: OAuthProvider = {
     const params = new URLSearchParams(hash)
     return params.get('code')
   },
-  processUserInfo: (data: any) => {
+  processUserInfo: (data: UserInfoData) => {
     if (!data) {
       return null
     }
 
     return {
-      id: data.id,
-      name: data.displayName,
-      email: data.mail || data.userPrincipalName,
+      id: data.id || '',
+      name: data.displayName || '',
+      email: data.mail || data.userPrincipalName || '',
       picture: '', // Microsoft Graph API requires separate photo request
     }
   },

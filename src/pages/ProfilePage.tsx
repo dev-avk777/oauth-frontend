@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
@@ -10,23 +10,29 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/")
+      navigate('/')
     }
   }, [user, navigate])
 
-  if (!user) return null
+  if (!user) {
+    return null
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
+    <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-6">
       <h1 className="text-3xl font-bold">Profile Page</h1>
-      <div className="text-center space-y-4">
+      <div className="space-y-4 text-center">
         <p className="text-xl">Welcome, {user.name}!</p>
         <p>This is your profile page that only you can see when authenticated.</p>
-        <img src={user.picture || "/placeholder.svg"} alt={user.name} className="w-16 h-16 rounded-full mx-auto" />
+        <img
+          alt={user.name}
+          className="mx-auto h-16 w-16 rounded-full"
+          src={user.picture || '/placeholder.svg'}
+        />
         <div className="mt-6">
           <button
+            className="rounded-md bg-red-500 px-6 py-2 text-white transition-colors hover:bg-red-600"
             onClick={logout}
-            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
           >
             Logout
           </button>
@@ -35,4 +41,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-

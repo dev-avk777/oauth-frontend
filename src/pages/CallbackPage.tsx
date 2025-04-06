@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 
 export default function CallbackPage() {
   const { handleAuthCallback, isLoading } = useAuth()
@@ -12,9 +12,9 @@ export default function CallbackPage() {
     const processAuth = async () => {
       const success = await handleAuthCallback()
       if (success) {
-        navigate("/profile")
+        navigate('/profile')
       } else {
-        navigate("/")
+        navigate('/')
       }
     }
 
@@ -22,12 +22,11 @@ export default function CallbackPage() {
   }, [handleAuthCallback, navigate])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh]">
-      <h1 className="text-2xl font-semibold mb-4">Processing authentication...</h1>
+    <div className="flex min-h-[70vh] flex-col items-center justify-center">
+      <h1 className="mb-4 text-2xl font-semibold">Processing authentication...</h1>
       {isLoading && (
-        <div className="w-8 h-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-b-transparent border-l-transparent border-r-transparent border-t-blue-500"></div>
       )}
     </div>
   )
 }
-
