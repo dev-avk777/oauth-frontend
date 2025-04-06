@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # База данных для Umami
+  # Database for Umami
   db:
     image: postgres:14
     container_name: umami-db
@@ -13,7 +13,7 @@ services:
     volumes:
       - umami-db-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"          # Проброс порта для доступа извне
+      - "5432:5432"          # Port mapping for external access
     networks:
       - webnet
     healthcheck:
@@ -33,7 +33,7 @@ services:
     networks:
       - webnet
 
-  # OAuth Frontend приложение
+  # OAuth Frontend application
   oauth-frontend:
     image: registry.gitlab.com/store_images/docker-images/oauth-frontend:latest
     container_name: oauth-frontend
@@ -52,7 +52,7 @@ services:
       retries: 3
       start_period: 5s
 
-  # Сервис Umami
+  # Umami service
   umami:
     image: docker.umami.is/umami-software/umami:postgresql-latest
     container_name: umami-app
@@ -66,7 +66,7 @@ services:
     networks:
       - webnet
 
-  # Сервис pool-creator (использует образ из GitLab Container Registry)
+  # Pool-creator service (uses image from GitLab Container Registry)
   pool-creator:
     image: registry.gitlab.com/store_images/docker-images/my-pool-creator:latest
     container_name: pool-creator-app
@@ -79,7 +79,7 @@ services:
     networks:
       - webnet
 
-  # Nginx – обратный прокси для Umami и Pool-creator
+  # Nginx - reverse proxy for Umami and Pool-creator
   nginx:
     image: nginx:latest
     container_name: nginx-proxy
@@ -103,7 +103,7 @@ services:
       com.example.project: "my-project"
       com.example.environment: "production"
 
-  # Certbot для автоматического обновления SSL-сертификатов
+  # Certbot for automatic SSL certificate renewal
   certbot:
     image: certbot/certbot
     container_name: certbot

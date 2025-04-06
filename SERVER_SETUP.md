@@ -1,13 +1,13 @@
-# Инструкция по добавлению OAuth Frontend в существующий docker-compose
+# Instructions for Adding OAuth Frontend to an Existing docker-compose
 
-Для добавления OAuth Frontend в существующую инфраструктуру сервера необходимо выполнить следующие шаги:
+To add OAuth Frontend to your existing server infrastructure, follow these steps:
 
-## 1. Добавить сервис в docker-compose.yml
+## 1. Add the service to docker-compose.yml
 
-Добавьте следующий блок в существующий файл `docker-compose.yml` на сервере:
+Add the following block to the existing `docker-compose.yml` file on your server:
 
 ```yaml
-# OAuth Frontend приложение
+# OAuth Frontend application
 oauth-frontend:
   image: registry.gitlab.com/store_images/docker-images/oauth-frontend:latest
   container_name: oauth-frontend
@@ -27,9 +27,9 @@ oauth-frontend:
     start_period: 5s
 ```
 
-## 2. Добавить зависимость в nginx-сервис
+## 2. Add dependency to the nginx service
 
-В секции `depends_on` для сервиса `nginx` добавьте `oauth-frontend`:
+In the `depends_on` section of the `nginx` service, add `oauth-frontend`:
 
 ```yaml
 depends_on:
@@ -38,24 +38,24 @@ depends_on:
   - oauth-frontend
 ```
 
-## 3. Создать файл с переменными окружения
+## 3. Create an environment variables file
 
-Создайте или обновите файл `.env` в директории, где находится `docker-compose.yml`:
+Create or update the `.env` file in the directory where `docker-compose.yml` is located:
 
 ```
-VITE_GOOGLE_CLIENT_ID=ваш_идентификатор_клиента_google_oauth
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
-## 4. Обновить NGINX-конфигурацию (при необходимости)
+## 4. Update NGINX configuration (if necessary)
 
-Если вы хотите, чтобы OAuth Frontend был доступен через домен, добавьте соответствующую конфигурацию в nginx:
+If you want the OAuth Frontend to be accessible via a domain, add the appropriate configuration to nginx:
 
-Создайте файл `nginx-oauth-frontend.conf` в директории nginx конфигураций:
+Create a `nginx-oauth-frontend.conf` file in the nginx configurations directory:
 
 ```nginx
 server {
     listen 80;
-    server_name auth.ваш-домен.ru;
+    server_name auth.your-domain.com;
 
     location / {
         proxy_pass http://oauth-frontend:3007;
@@ -67,7 +67,7 @@ server {
 }
 ```
 
-И добавьте его в монтирование в сервисе nginx:
+And add it to the mounting in the nginx service:
 
 ```yaml
 volumes:
@@ -77,23 +77,23 @@ volumes:
   - ./certbot/www:/var/www/certbot
 ```
 
-## 5. Запуск сервиса
+## 5. Start the service
 
-После внесения всех изменений выполните команду:
+After making all the changes, run the command:
 
 ```bash
 docker-compose up -d oauth-frontend
 ```
 
-## 6. Проверка работоспособности
+## 6. Check the functionality
 
-Проверьте, что сервис запущен и работает:
+Verify that the service is up and running:
 
 ```bash
 docker-compose ps oauth-frontend
 ```
 
-Проверьте логи на наличие ошибок:
+Check the logs for errors:
 
 ```bash
 docker-compose logs -f oauth-frontend

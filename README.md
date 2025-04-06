@@ -103,29 +103,29 @@ To add more OAuth providers:
 3. Update the login UI to include the new provider
 4. Set up the necessary environment variables
 
-## Переменные окружения
+## Environment Variables
 
-### Разработка
+### Development
 
-Для локальной разработки создайте файл `.env.development` в корне проекта со следующим содержимым:
+For local development, create a `.env.development` file in the project root with the following content:
 
 ```
 VITE_GOOGLE_CLIENT_ID=your_development_google_client_id
 ```
 
-Замените `your_development_google_client_id` на ваш реальный ID клиента Google OAuth.
+Replace `your_development_google_client_id` with your actual Google OAuth client ID.
 
-Вы можете также передать переменную окружения напрямую при запуске:
+You can also pass the environment variable directly when starting the application:
 
 ```bash
 VITE_GOOGLE_CLIENT_ID=your_google_client_id pnpm dev
 ```
 
-### Продакшен
+### Production
 
-Для продакшен-сборки переменные окружения передаются через GitHub Actions из секретов репозитория.
+For production builds, environment variables are passed through GitHub Actions from the repository secrets.
 
-В GitHub Actions workflow (`.github/workflows/deploy.yml`) переменная извлекается из секретов репозитория и передается при сборке:
+In the GitHub Actions workflow (`.github/workflows/deploy.yml`), the variable is extracted from the repository secrets and passed during the build:
 
 ```yaml
 env:
@@ -134,13 +134,13 @@ env:
 
 ### Docker
 
-При запуске Docker-контейнера переменные окружения передаются через параметр `-e`:
+When running the Docker container, environment variables are passed via the `-e` parameter:
 
 ```bash
 docker run -d -p 3007:3007 -e VITE_GOOGLE_CLIENT_ID=your_google_client_id --name oauth-frontend oauth-frontend:latest
 ```
 
-Или через файл `.env` при использовании docker-compose:
+Or via the `.env` file when using docker-compose:
 
 ```bash
 echo "VITE_GOOGLE_CLIENT_ID=your_google_client_id" > .env

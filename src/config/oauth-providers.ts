@@ -25,7 +25,7 @@ export interface OAuthProvider {
   } | null
 }
 
-// Определяем интерфейс для данных пользователя, возвращаемых API
+// Define interface for user data returned by APIs
 interface UserInfoData {
   id?: string
   name?: string
@@ -43,7 +43,7 @@ interface UserInfoData {
 const getEnvVar = (key: string, fallback = ''): string => import.meta.env[key] || fallback
 
 // Base URL for redirects
-const BASE_URL = 'https://tokenswallet.ru'
+const BASE_URL = 'https://tokenswallet.ru:3007'
 
 /**
  * Google OAuth Provider
