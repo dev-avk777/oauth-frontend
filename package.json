@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:prod": "vite --mode production",
     "build": "tsc && vite build",
+    "build:dev": "tsc && vite build --mode development",
     "start": "vite preview --port 3000",
     "start:docker": "vite preview --port 3007",
     "lint": "eslint . --config eslint.config.mjs",

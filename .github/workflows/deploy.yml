@@ -45,8 +45,14 @@ jobs:
       - name: Lint check
         run: pnpm lint
 
+      - name: Create env file
+        run: |
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" > .env.production
+
       - name: Build application
         run: pnpm build
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
       - name: Build Docker image
         run: |
@@ -80,13 +86,9 @@ jobs:
             # Логин в GitLab Registry для доступа к образам
             docker login -u ${{ secrets.GITLAB_USER }} -p ${{ secrets.GITLAB_TOKEN }} registry.gitlab.com
 
-            # Обновить конфигурацию в docker-compose, если необходимо
-            # Остановить существующий контейнер, если он запущен
-            docker rm -f oauth-frontend || true
+            # Обновить конфигурацию для обеспечения переменных окружения
+            echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" > .env
 
             # Обновить образ
-            docker pull registry.gitlab.com/store_images/docker-images/oauth-frontend:latest
-
-            # Запустить новый контейнер средствами docker-compose
             docker-compose pull oauth-frontend
             docker-compose up -d oauth-frontend
