@@ -17,21 +17,20 @@ type LoginCredentials = {
   password: string
 }
 
-// Extended context type to include email/password login
+// Обновленный тип контекста без Google авторизации
 type AuthContextType = {
   user: User | null
   isLoading: boolean
-  loginWithGoogle: () => void
   loginWithCredentials: (credentials: LoginCredentials) => Promise<boolean>
   logout: () => void
   handleAuthCallback: () => Promise<boolean>
   error: string | null
 }
 
+// Создаем контекст без метода для Google авторизации
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: false,
-  loginWithGoogle: () => {},
   loginWithCredentials: async () => false,
   logout: () => {},
   handleAuthCallback: async () => false,
@@ -41,7 +40,7 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 // Get API URL from environment variables
-const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5000'
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -50,11 +49,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Login with Google OAuth
-  const loginWithGoogle = useCallback(() => {
-    window.location.href = `${API_URL}/auth/google`
-  }, [])
 
   // Login with email and password
   const loginWithCredentials = useCallback(
@@ -102,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     []
   )
 
-  // Handle callback from auth server (for Google OAuth)
+  // Handle callback from auth server
   const handleAuthCallback = useCallback(async (): Promise<boolean> => {
     setIsLoading(true)
     setError(null)
@@ -169,7 +163,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         isLoading,
-        loginWithGoogle,
         loginWithCredentials,
         logout,
         handleAuthCallback,

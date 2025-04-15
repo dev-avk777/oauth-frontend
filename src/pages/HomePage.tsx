@@ -2,14 +2,11 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { FcGoogle } from 'react-icons/fc'
-import { FaEthereum } from 'react-icons/fa'
 
 export default function HomePage() {
-  const { user, loginWithGoogle, loginWithCredentials, isLoading, error } = useAuth()
+  const { user, loginWithCredentials, isLoading, error } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showLoginForm, setShowLoginForm] = useState(false)
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,72 +44,43 @@ export default function HomePage() {
           )}
 
           {/* Login Form */}
-          {showLoginForm ? (
-            <form className="mx-auto w-80 space-y-4" onSubmit={handleEmailLogin}>
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700" htmlFor="password">
-                  Password
-                </label>
-                <input
-                  required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="pt-2">
-                <button
-                  className="w-full rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-                  disabled={isLoading}
-                  type="submit"
-                >
-                  {isLoading ? 'Signing in...' : 'Sign in'}
-                </button>
-                <button
-                  className="mt-2 text-sm text-blue-600 hover:text-blue-800"
-                  type="button"
-                  onClick={() => setShowLoginForm(false)}
-                >
-                  Back to options
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-3">
+          <form className="mx-auto w-80 space-y-4" onSubmit={handleEmailLogin}>
+            <div className="text-left">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+                Email
+              </label>
+              <input
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="text-left">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
+                Password
+              </label>
+              <input
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="pt-2">
               <button
-                className="flex w-60 items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-800 shadow-md transition-all hover:shadow-lg"
+                className="w-full rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                 disabled={isLoading}
-                onClick={loginWithGoogle}
+                type="submit"
               >
-                <FcGoogle className="text-xl" />
-                <span>Continue with Google</span>
-              </button>
-
-              <button
-                className="flex w-60 items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-800 shadow-md transition-all hover:shadow-lg"
-                disabled={isLoading}
-                onClick={() => setShowLoginForm(true)}
-              >
-                <FaEthereum className="text-xl text-blue-500" />
-                <span>Sign in with Email</span>
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
-          )}
+          </form>
         </div>
       )}
     </div>

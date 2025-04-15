@@ -6,7 +6,6 @@ services:
     ports:
       - "3007:3007"
     environment:
-      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
       - NODE_ENV=production
     deploy:
       resources:
