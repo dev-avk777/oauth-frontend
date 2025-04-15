@@ -2,34 +2,46 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 
+// Updated User type to match ethereum-key-vault API response
 type User = {
   id: string
-  name: string
   email: string
-  picture: string
+  displayName?: string
+  publicKey: string
+  picture?: string
 }
 
+// Add types for login credentials
+type LoginCredentials = {
+  email: string
+  password: string
+}
+
+// Extended context type to include email/password login
 type AuthContextType = {
   user: User | null
   isLoading: boolean
-  login: () => void
+  loginWithGoogle: () => void
+  loginWithCredentials: (credentials: LoginCredentials) => Promise<boolean>
   logout: () => void
   handleAuthCallback: () => Promise<boolean>
+  error: string | null
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: false,
-  login: () => {},
+  loginWithGoogle: () => {},
+  loginWithCredentials: async () => false,
   logout: () => {},
   handleAuthCallback: async () => false,
+  error: null,
 })
 
 export const useAuth = () => useContext(AuthContext)
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'
-const REDIRECT_URI = 'https://tokenswallet.ru/callback'
-const SCOPE = 'email profile'
+// Get API URL from environment variables
+const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3000'
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -37,30 +49,76 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return savedUser ? JSON.parse(savedUser) : null
   })
   const [isLoading, setIsLoading] = useState(false)
-  const login = useCallback(() => {
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPE}`
-    window.location.href = authUrl
+  const [error, setError] = useState<string | null>(null)
+
+  // Login with Google OAuth
+  const loginWithGoogle = useCallback(() => {
+    window.location.href = `${API_URL}/auth/google`
   }, [])
 
-  const handleAuthCallback = useCallback(async (): Promise<boolean> => {
-    setIsLoading(true)
+  // Login with email and password
+  const loginWithCredentials = useCallback(
+    async (credentials: LoginCredentials): Promise<boolean> => {
+      setIsLoading(true)
+      setError(null)
 
-    try {
-      const hash = window.location.hash.substring(1)
-      const params = new URLSearchParams(hash)
-      const accessToken = params.get('access_token')
+      try {
+        const response = await fetch(`${API_URL}/users/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(credentials),
+          credentials: 'include', // Important for cookies
+        })
 
-      if (!accessToken) {
-        console.error('No access token found')
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || 'Login failed')
+        }
+
+        const userData = await response.json()
+
+        // Format user data
+        const user: User = {
+          id: userData.id,
+          email: userData.email,
+          displayName: userData.displayName || userData.email.split('@')[0],
+          publicKey: userData.publicKey,
+          picture: '/placeholder.svg', // Default placeholder
+        }
+
+        setUser(user)
+        localStorage.setItem('auth_user', JSON.stringify(user))
+        setIsLoading(false)
+        return true
+      } catch (error) {
+        console.error('Authentication error:', error)
+        setError(error instanceof Error ? error.message : 'Login failed')
         setIsLoading(false)
         return false
       }
+    },
+    []
+  )
 
-      //here backend call?
-      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+  // Handle callback from auth server (for Google OAuth)
+  const handleAuthCallback = useCallback(async (): Promise<boolean> => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Parse URL query for error information
+      const params = new URLSearchParams(window.location.search)
+      const errorMsg = params.get('message')
+
+      if (errorMsg) {
+        throw new Error(decodeURIComponent(errorMsg))
+      }
+
+      // Get user info from auth endpoint (uses cookie from redirect)
+      const response = await fetch(`${API_URL}/auth/user-info`, {
+        credentials: 'include', // Important to include cookies
       })
 
       if (!response.ok) {
@@ -69,32 +127,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const userData = await response.json()
 
+      // Format user data
       const user: User = {
         id: userData.id,
-        name: userData.name,
         email: userData.email,
-        picture: userData.picture,
+        displayName: userData.displayName || userData.email.split('@')[0],
+        publicKey: userData.publicKey,
+        picture: '/placeholder.svg', // We can use a placeholder image
       }
 
       setUser(user)
       localStorage.setItem('auth_user', JSON.stringify(user))
-
       setIsLoading(false)
       return true
     } catch (error) {
       console.error('Authentication error:', error)
+      setError(error instanceof Error ? error.message : 'Authentication failed')
       setIsLoading(false)
       return false
     }
   }, [])
 
-  const logout = useCallback(() => {
-    setUser(null)
-    localStorage.removeItem('auth_user')
+  const logout = useCallback(async () => {
+    try {
+      // Clear cookies on the server
+      await fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      // Clear local state regardless of server response
+      setUser(null)
+      localStorage.removeItem('auth_user')
+    }
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, handleAuthCallback }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        loginWithGoogle,
+        loginWithCredentials,
+        logout,
+        handleAuthCallback,
+        error,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
