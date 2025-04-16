@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from '@/pages/HomePage'
-import CallbackPage from '@/pages/CallbackPage'
+
 import ProfilePage from '@/pages/ProfilePage'
 import { AuthProvider } from '@/context/AuthContext'
+import { CallbackPage } from './pages/CallbackPage'
 
 export default function App() {
   return (
