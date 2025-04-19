@@ -1,5 +1,3 @@
-// src/config.ts
-
 const config = {
   apiUrl:
     import.meta.env.MODE === 'production'
