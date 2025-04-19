@@ -18,6 +18,7 @@ export default function HomePage() {
     e.preventDefault()
     const success = await loginWithCredentials({ email, password })
     if (success) {
+      await new Promise(resolve => setTimeout(resolve, 100)) // delay for 100ms
       navigate('/profile')
     }
   }
@@ -26,6 +27,7 @@ export default function HomePage() {
     e.preventDefault()
     const success = await registerUser({ email, password })
     if (success) {
+      await new Promise(resolve => setTimeout(resolve, 100)) // delay for 100ms
       navigate('/profile')
     }
   }

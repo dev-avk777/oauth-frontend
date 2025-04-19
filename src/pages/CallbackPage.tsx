@@ -1,25 +1,33 @@
-// src/pages/CallbackPage.tsx
 'use client'
 
 import { useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { getUserInfo } from '@/api/authApi'
 
 export const CallbackPage = () => {
-  const { handleAuthCallback, isLoading, error } = useAuth()
+  const { isLoading, error, logout } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
     const run = async () => {
-      const success = await handleAuthCallback()
-      if (success) {
-        navigate('/profile')
-      } else {
+      try {
+        const userData = await getUserInfo()
+        // если всё ок — редирект
+        if (userData) {
+          navigate('/profile')
+        } else {
+          navigate('/')
+        }
+      } catch {
+        // если ошибка — например, кука не валидна
+        await logout()
         navigate('/')
       }
     }
+
     run()
-  }, [handleAuthCallback, navigate])
+  }, [navigate, logout])
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
