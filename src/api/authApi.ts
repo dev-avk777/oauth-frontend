@@ -1,6 +1,6 @@
 import config from '../config.ts'
 
-// Логин по email/password, сервер ставит HttpOnly‑cookie с JWT
+// Login with email/password, server sets HttpOnly cookie with JWT
 export const login = async (credentials: { email: string; password: string }) => {
   const response = await fetch(`${config.apiUrl}/users/login`, {
     method: 'POST',
@@ -16,7 +16,7 @@ export const login = async (credentials: { email: string; password: string }) =>
   return response.json()
 }
 
-// Регистрация нового пользователя
+// Register a new user
 export const register = async (credentials: { email: string; password: string }) => {
   const response = await fetch(`${config.apiUrl}/users/register`, {
     method: 'POST',
@@ -32,12 +32,12 @@ export const register = async (credentials: { email: string; password: string })
   return response.json()
 }
 
-// Инициируем Google‑OAuth, убрали лишний ?redirect_uri
+// Initiate Google OAuth, removed unnecessary ?redirect_uri
 export const loginWithGoogle = () => {
   window.location.href = `${config.apiUrl}/auth/google`
 }
 
-// Получить инфо по залогиненному (читает authToken‑cookie)
+// Get info about the logged-in user (reads authToken cookie)
 export const getUserInfo = async () => {
   const response = await fetch(`${config.apiUrl}/auth/user-info`, {
     credentials: 'include', // обязательно, чтобы cookie ушли
@@ -49,7 +49,7 @@ export const getUserInfo = async () => {
   return response.json()
 }
 
-// Логаут через GET (в сервере стоит @Get('logout'))
+// Logout via GET (server has @Get('logout'))
 export const logoutApi = async () => {
   const response = await fetch(`${config.apiUrl}/auth/logout`, {
     method: 'GET',
@@ -60,7 +60,7 @@ export const logoutApi = async () => {
   }
 }
 
-// Методы для работы с Ethereum-ключами — без изменений
+// Methods for working with Ethereum keys — unchanged
 export const createEthereumKey = async () => {
   const response = await fetch(`${config.apiUrl}/ethereum/keys/create`, {
     method: 'POST',
@@ -94,6 +94,7 @@ type Transaction = {
   gasPrice?: string
 }
 
+// Sign a transaction
 export const signTransaction = async (keyId: string, transaction: Transaction) => {
   const response = await fetch(`${config.apiUrl}/ethereum/keys/${keyId}/sign`, {
     method: 'POST',
@@ -108,6 +109,7 @@ export const signTransaction = async (keyId: string, transaction: Transaction) =
   return response.json()
 }
 
+// Get Ethereum balance
 export const getEthereumBalance = async (address: string) => {
   const response = await fetch(`${config.apiUrl}/ethereum/balance/${address}`, {
     credentials: 'include',

@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { login, register, getUserInfo, logoutApi } from '@/api/authApi'
 
-// Тип пользователя, получаемый с бэка
+// User type received from the backend
 type User = {
   id: string
   email: string
@@ -12,9 +12,10 @@ type User = {
   picture?: string
 }
 
-// Данные для логина/регистрации
+// Login/registration data
 type LoginCredentials = { email: string; password: string }
 
+// Context type for authentication
 interface AuthContextType {
   user: User | null
   isLoading: boolean
@@ -47,6 +48,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext)
 
+// AuthProvider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)

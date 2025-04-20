@@ -5,11 +5,12 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { FcGoogle } from 'react-icons/fc'
 
+// Home page component for login and registration
 export default function HomePage() {
   const { user, loginWithCredentials, registerUser, loginWithGoogle, isLoading, error } = useAuth()
   const navigate = useNavigate()
 
-  // Режим: "login" или "register"
+  // Mode: "login" or "register"
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,7 +33,7 @@ export default function HomePage() {
     }
   }
 
-  // Если пользователь уже есть, сразу на профиль
+  // If user is already logged in, redirect to profile
   if (user) {
     navigate('/profile')
     return null
@@ -58,7 +59,7 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Форма логина или регистрации */}
+      {/* Form for login or registration */}
       <form
         className="mx-auto w-80 space-y-4"
         onSubmit={mode === 'login' ? handleEmailLogin : handleRegister}
@@ -109,7 +110,7 @@ export default function HomePage() {
         </button>
       </form>
 
-      {/* Разделитель и Google OAuth */}
+      {/* Divider and Google OAuth */}
       <div className="relative my-4 w-80 text-center">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>

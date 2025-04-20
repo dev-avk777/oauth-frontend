@@ -5,6 +5,10 @@ import { useAuth } from '@/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { getUserInfo } from '@/api/authApi'
 
+/**
+ * Callback page for handling authentication
+ * Redirects user based on authentication status
+ */
 export const CallbackPage = () => {
   const { isLoading, error, logout } = useAuth()
   const navigate = useNavigate()
@@ -13,19 +17,18 @@ export const CallbackPage = () => {
     const run = async () => {
       try {
         const userData = await getUserInfo()
-        // если всё ок — редирект
+        // If everything is okay — redirect
         if (userData) {
           navigate('/profile')
         } else {
           navigate('/')
         }
       } catch {
-        // если ошибка — например, кука не валидна
+        // If there's an error — for example, cookie is invalid
         await logout()
         navigate('/')
       }
     }
-
     run()
   }, [navigate, logout])
 
