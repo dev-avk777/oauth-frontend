@@ -6,7 +6,7 @@ export const login = async (credentials: { email: string; password: string }) =>
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
-    credentials: 'include', // передаём куки
+    credentials: 'include', // send cookies
   })
 
   if (!response.ok) {
@@ -32,7 +32,7 @@ export const register = async (credentials: { email: string; password: string })
   return response.json()
 }
 
-// Initiate Google OAuth, removed unnecessary ?redirect_uri
+// Initiate Google OAuth
 export const loginWithGoogle = () => {
   window.location.href = `${config.apiUrl}/auth/google`
 }
@@ -40,7 +40,7 @@ export const loginWithGoogle = () => {
 // Get info about the logged-in user (reads authToken cookie)
 export const getUserInfo = async () => {
   const response = await fetch(`${config.apiUrl}/auth/user-info`, {
-    credentials: 'include', // обязательно, чтобы cookie ушли
+    credentials: 'include', // necessary to send cookies
     headers: { Accept: 'application/json' },
   })
   if (!response.ok) {
@@ -49,7 +49,7 @@ export const getUserInfo = async () => {
   return response.json()
 }
 
-// Logout via GET (server has @Get('logout'))
+// Logout via GET
 export const logoutApi = async () => {
   const response = await fetch(`${config.apiUrl}/auth/logout`, {
     method: 'GET',
@@ -60,7 +60,7 @@ export const logoutApi = async () => {
   }
 }
 
-// Methods for working with Ethereum keys — unchanged
+// Methods for working with Ethereum keys
 export const createEthereumKey = async () => {
   const response = await fetch(`${config.apiUrl}/ethereum/keys/create`, {
     method: 'POST',

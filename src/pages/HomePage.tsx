@@ -43,7 +43,7 @@ export default function HomePage() {
     <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-6">
       <h1 className="text-3xl font-bold">Ethereum Key Vault</h1>
 
-      {/* Переключатель режимов */}
+      {/* Mode switcher */}
       <div className="flex space-x-4">
         <button
           className={`rounded px-4 py-2 ${mode === 'login' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}

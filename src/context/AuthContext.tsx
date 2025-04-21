@@ -26,7 +26,7 @@ interface AuthContextType {
   error: string | null
   createKey: () => Promise<null>
   getUserKeys: () => Promise<null[]>
-  signTx: (...args: any[]) => Promise<null>
+  signTx: (transaction: unknown) => Promise<null>
   getBalance: (address: string) => Promise<string>
   ethereumKeys: null[]
 }
@@ -61,8 +61,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userData = await login(credentials)
       setUser(userData)
       return true
-    } catch (err: any) {
-      setError(err.message || 'Login failed')
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Login failed')
       return false
     } finally {
       setIsLoading(false)
@@ -74,8 +74,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null)
     try {
       window.location.href = `${import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5000'}/auth/google`
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
       setIsLoading(false)
     }
   }, [])
@@ -87,8 +87,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userData = await register(credentials)
       setUser(userData)
       return true
-    } catch (err: any) {
-      setError(err.message || 'Registration failed')
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Registration failed')
       return false
     } finally {
       setIsLoading(false)
