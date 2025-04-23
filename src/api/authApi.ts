@@ -32,7 +32,7 @@ export const register = async (credentials: { email: string; password: string })
   return response.json()
 }
 
-// Initiate Google OAuth
+// Open OAuth login url (redirects to Google)
 export const loginWithGoogle = () => {
   window.location.href = `${config.apiUrl}/auth/google`
 }
@@ -49,6 +49,32 @@ export const getUserInfo = async () => {
   return response.json()
 }
 
+/**
+ * Get detailed user information by ID
+ * @param userId - The ID of the user to fetch information for
+ * @returns Promise with user data
+ */
+export const getUserById = async (userId: string) => {
+  // Get auth token from storage if needed
+  const token = localStorage.getItem('authToken')
+
+  const response = await fetch(`${config.apiUrl}/auth/user/${userId}`, {
+    method: 'GET',
+    credentials: 'include', // For cookies
+    headers: {
+      Accept: 'application/json',
+      Authorization: token ? `Bearer ${token}` : '', // Include token if available
+    },
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to fetch user with ID: ${userId}`)
+  }
+
+  return response.json()
+}
+
 // Logout via GET
 export const logoutApi = async () => {
   const response = await fetch(`${config.apiUrl}/auth/logout`, {
@@ -60,7 +86,19 @@ export const logoutApi = async () => {
   }
 }
 
-// Methods for working with Ethereum keys
+//TODO: add logic in backend
+// Transaction interface
+interface Transaction {
+  to: string
+  value: string
+  data?: string
+  nonce?: number
+  gasLimit?: string
+  maxFeePerGas?: string
+  maxPriorityFeePerGas?: string
+}
+
+// Create new Ethereum key
 export const createEthereumKey = async () => {
   const response = await fetch(`${config.apiUrl}/ethereum/keys/create`, {
     method: 'POST',
@@ -69,11 +107,12 @@ export const createEthereumKey = async () => {
   })
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.message || 'Failed to create Ethereum key')
+    throw new Error(errorData.message || 'Failed to create key')
   }
   return response.json()
 }
 
+// List Ethereum keys
 export const getEthereumKeys = async () => {
   const response = await fetch(`${config.apiUrl}/ethereum/keys`, {
     credentials: 'include',
@@ -84,14 +123,6 @@ export const getEthereumKeys = async () => {
     throw new Error(errorData.message || `Failed to fetch keys: ${response.status}`)
   }
   return response.json()
-}
-
-type Transaction = {
-  to: string
-  value: string
-  data?: string
-  gasLimit?: string
-  gasPrice?: string
 }
 
 // Sign a transaction
