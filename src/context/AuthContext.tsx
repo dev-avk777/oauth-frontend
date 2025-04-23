@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
-import { login, register, getUserInfo, logoutApi } from '@/api/authApi'
+import { login, register, getUserInfo, logoutApi, getUserById } from '@/api/authApi'
 
 // User type received from the backend
 type User = {
@@ -59,7 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null)
     try {
       const userData = await login(credentials)
-      setUser(userData)
+      if (userData && userData.id) {
+        // Fetch complete user data using the new getUserById endpoint
+        try {
+          const fullUserData = await getUserById(userData.id)
+          setUser(fullUserData)
+        } catch (err) {
+          console.error('Failed to fetch complete user data:', err)
+          // Set basic user data as fallback
+          setUser(userData)
+        }
+      } else {
+        setUser(userData)
+      }
       return true
     } catch (err: unknown) {
       setError((err as Error).message || 'Login failed')
@@ -85,7 +97,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null)
     try {
       const userData = await register(credentials)
-      setUser(userData)
+      if (userData && userData.id) {
+        // Fetch complete user data using the new getUserById endpoint
+        try {
+          const fullUserData = await getUserById(userData.id)
+          setUser(fullUserData)
+        } catch (err) {
+          console.error('Failed to fetch complete user data:', err)
+          // Set basic user data as fallback
+          setUser(userData)
+        }
+      } else {
+        setUser(userData)
+      }
       return true
     } catch (err: unknown) {
       setError((err as Error).message || 'Registration failed')
@@ -98,8 +122,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = useCallback(async () => {
     try {
       await logoutApi()
-    } catch {
-      console.error('Logout failed')
+    } catch (err) {
+      console.error('Logout failed', err)
     }
     setUser(null)
   }, [])
