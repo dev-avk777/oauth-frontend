@@ -44,31 +44,26 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: frontend-oauth-frontend
 
       - name: Lint check
         run: pnpm lint
-        working-directory: frontend-oauth-frontend
 
       - name: Create env file
         run: |
-          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" > frontend-oauth-frontend/.env.production
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" > .env.production
 
       - name: Build application
         run: pnpm build
-        working-directory: frontend-oauth-frontend
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
       - name: Build Docker image
         run: docker build -t oauth-frontend:latest .
-        working-directory: frontend-oauth-frontend
 
       - name: Tag image for GitLab Registry
         run: |
           docker tag oauth-frontend:latest registry.gitlab.com/store_images/docker-images/oauth-frontend:latest
           docker tag oauth-frontend:latest registry.gitlab.com/store_images/docker-images/oauth-frontend:${{ github.sha }}
-        working-directory: frontend-oauth-frontend
 
       - name: Login to GitLab Registry on runner
         uses: docker/login-action@v3
