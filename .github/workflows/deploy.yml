@@ -39,6 +39,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Debug: list workspace
+        run: ls -R "${{ github.workspace }}"
+
       - name: Install dependencies
         run: pnpm install
         working-directory: frontend-oauth-frontend
