@@ -5,8 +5,11 @@ WORKDIR /app
 # Копировать только package.json и pnpm-lock.yaml
 COPY package.json pnpm-lock.yaml ./
 
-# Установить pnpm и зависимости
-RUN npm install -g pnpm && pnpm install
+# Устанавливаем pnpm, зависимости и curl в одном слое
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm \
+  && pnpm install \
+  && apk add --no-cache curl
 
 # Затем копировать остальные файлы
 COPY . .
