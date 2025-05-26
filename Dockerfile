@@ -2,21 +2,21 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Копировать только package.json и pnpm-lock.yaml
+# Копируем только package.json, lock-файл и .env.production
 COPY package.json pnpm-lock.yaml ./
+COPY .env.production .env.production
 
-# Устанавливаем pnpm, зависимости и curl в одном слое
-COPY package.json pnpm-lock.yaml ./
+# Устанавливаем pnpm, зависимости и curl
 RUN npm install -g pnpm \
   && pnpm install \
   && apk add --no-cache curl
 
-# Затем копировать остальные файлы
+# Копируем остальной код
 COPY . .
 
-# Собрать приложение
+# Собираем фронтенд
 RUN pnpm build
 
-# Команда запуска
+# Открываем порт и запускаем preview-сервер
 EXPOSE 3007
 CMD ["pnpm", "run", "preview", "--host", "0.0.0.0", "--port", "3007"]
