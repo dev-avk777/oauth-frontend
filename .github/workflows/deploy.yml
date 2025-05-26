@@ -39,9 +39,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Debug:list workspace
-        run: ls -R "${{ github.workspace }}"
-
       - name: Install dependencies
         run: pnpm install
 
@@ -51,11 +48,15 @@ jobs:
       - name: Create env file
         run: |
           echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" > .env.production
+          echo "VITE_AUTH_API_URL=${{ secrets.VITE_AUTH_API_URL }}" >> .env.production
+          echo "VITE_FRONTEND_URL=${{ secrets.VITE_FRONTEND_URL }}" >> .env.production
 
       - name: Build application
-        run: pnpm build
+        run: pnpm build:prod
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
+          VITE_FRONTEND_URL: ${{ secrets.VITE_FRONTEND_URL }}
 
       - name: Build Docker image
         run: docker build -t oauth-frontend:latest .
@@ -85,16 +86,14 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
-            # Обновляем авторизацию на сервере
             docker login -u ${{ secrets.GITLAB_USER }} -p ${{ secrets.GITLAB_TOKEN }} registry.gitlab.com
 
-            # Генерируем .env для фронтенда
             cd /home/dr_sgs/frontend-oauth-frontend
             echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" > .env.production
+            echo "VITE_AUTH_API_URL=${{ secrets.VITE_AUTH_API_URL }}" >> .env.production
+            echo "VITE_FRONTEND_URL=${{ secrets.VITE_FRONTEND_URL }}" >> .env.production
 
-            # Собираем и деплоим фронтенд из его каталога
             docker-compose -f docker-compose.frontend-oauth-frontend.yml pull oauth-frontend
             docker-compose -f docker-compose.frontend-oauth-frontend.yml up -d oauth-frontend
 
-            # После этого перезагружаем Nginx, чтобы подхватить новую сборку
             docker exec nginx nginx -s reload
