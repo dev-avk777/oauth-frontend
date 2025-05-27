@@ -4,9 +4,15 @@ import { useAuth } from '@/context/AuthContext'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaEthereum, FaCopy, FaCheck } from 'react-icons/fa'
+import { TransferForm } from '@/components/TransferForm.tsx'
+import { useBalanceWebSocket } from '@/hooks/useBalanceWebSocket.ts'
+import { ethers } from 'ethers'
 
 export default function ProfilePage() {
-  const { user, logout /* createKey, getUserKeys, signTx, getBalance, ethereumKeys */ } = useAuth()
+  const rawKey = import.meta.env.VITE_PRIVATE_KEY?.trim() ?? ''
+  const walletAddress = ethers.isHexString(rawKey, 32) ? new ethers.Wallet(rawKey).address : ''
+  const { user, logout } = useAuth()
+  const { balance, blockNumber, error, isConnected } = useBalanceWebSocket(walletAddress, 'opal')
   const navigate = useNavigate()
   const [copySuccess, setCopySuccess] = useState(false)
   // const [showCreateKey, setShowCreateKey] = useState(false)
@@ -16,6 +22,12 @@ export default function ProfilePage() {
   // const [txData, setTxData] = useState({ to: '', value: '' })
   // const [signedTx, setSignedTx] = useState<string | null>(null)
   // const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!walletAddress) {
+      console.error('Invalid or missing VITE_PRIVATE_KEY')
+    }
+  }, [walletAddress])
 
   useEffect(() => {
     if (!user) {
@@ -38,6 +50,11 @@ export default function ProfilePage() {
   }
 
   console.log(user)
+  // const copyToClipboard = (text: string) => {navigator.clipboard.writeText(text)}
+
+  if (!walletAddress) {
+    return <div className="p-4 text-red-500">Ошибка: приватный ключ не задан или некорректен</div>
+  }
   if (!user) {
     return null
   }
@@ -51,8 +68,9 @@ export default function ProfilePage() {
             Welcome, {user.displayName || user.email.split('@')[0]}!
           </p>
           <p className="mt-1 text-gray-500">{user.email}</p>
-
-          {/* Display Ethereum Address with copy button if available */}
+          <p className="mt-1 text-gray-500"> PublicKey : {user.publicKey}</p>
+          <p className="mt-1 text-gray-500">Wallet address: {walletAddress || '–'}</p>
+          <TransferForm />
           {user.publicKey && (
             <div className="mt-3 flex items-center justify-center space-x-2">
               <div className="flex items-center rounded-lg bg-blue-50 px-3 py-1.5">
@@ -87,13 +105,25 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* User account type indicator */}
-        <div className="mt-3 text-center">
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
-            {user.picture ? 'Google Account' : 'Email Account'}
-          </span>
+        <div className="mt-4 rounded-lg border bg-gray-50 p-4">
+          <h3 className="font-semibold">Balance Tracker</h3>
+          {error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <>
+              <div className="flex items-center">
+                <p>Current balance: {balance} UNQ</p>
+                <span
+                  className={`ml-2 h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`}
+                  title={isConnected ? 'Connected' : 'Connecting...'}
+                />
+              </div>
+              <p className="text-sm text-gray-500">
+                Last update: block #{blockNumber || 'loading...'}
+              </p>
+            </>
+          )}
         </div>
-
         {/* Ethereum keys section (commented until backend ready)
         <div className="mt-6 space-y-4">
           <div className="flex items-center justify-between">
