@@ -19,6 +19,7 @@ const config = {
   substrate: {
     balanceEndpoint: `${apiUrl}/substrate/balance`,
     configEndpoint: `${apiUrl}/substrate/config`,
+    transferEndpoint: `${apiUrl}/substrate/transfer`,
     rpcUrl: import.meta.env.VITE_SUBSTRATE_WS || 'wss://rpc-opal.unique.network',
   },
 }
