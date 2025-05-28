@@ -36,7 +36,7 @@ export const BalanceCard: React.FC<Props> = ({ current, history, status, tokenId
         <div className="flex items-center">
           <FaEthereum className="mr-2 text-blue-500" />
           <span className="text-3xl font-bold">
-            {current.balance} {tokenId}
+            {parseFloat(current.balance).toFixed(4)} {tokenId}
           </span>
         </div>
         <div className={`h-3 w-3 rounded-full ${statusColors[status]}`} />
@@ -58,7 +58,7 @@ export const BalanceCard: React.FC<Props> = ({ current, history, status, tokenId
               className="flex justify-between border-t border-gray-100 py-1 text-sm text-gray-600"
             >
               <span>
-                {item.balance} {tokenId}
+                {parseFloat(current.balance).toFixed(4)} {tokenId}
               </span>
               {item.blockNumber && <span>#{item.blockNumber}</span>}
               {item.timestamp && <span>{new Date(item.timestamp).toLocaleTimeString()}</span>}
