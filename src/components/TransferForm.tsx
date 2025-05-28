@@ -18,6 +18,7 @@ export const TransferForm: React.FC<TransferFormProps> = ({
   const [amount, setAmount] = useState('')
   const [error, setError] = useState<string>()
   const [submitting, setSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const parsePlancks = (amt: string): bigint => {
     const num = parseFloat(amt)
@@ -56,57 +57,79 @@ export const TransferForm: React.FC<TransferFormProps> = ({
       if (onSuccess) {
         onSuccess()
       }
-      alert('Перевод отправлен!')
-    } catch (err: any) {
-      setError(err.message)
+      setShowSuccess(true)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Произошла ошибка при переводе')
+      }
     } finally {
       setSubmitting(false)
     }
   }
   const isEmpty = maxBalance === BigInt(0)
   return (
-    <form className="space-y-4 rounded-lg border bg-gray-50 p-4" onSubmit={handleSubmit}>
-      <h2 className="text-lg font-medium">Перевод {tokenSymbol}</h2>
-      <div>
-        <label className="block text-sm font-medium">Адрес получателя</label>
-        <input
-          required
-          className="mt-1 w-full rounded border px-2 py-1"
+    <>
+      <form className="space-y-4 rounded-lg border bg-gray-50 p-4" onSubmit={handleSubmit}>
+        <h2 className="text-lg font-medium">Перевод {tokenSymbol}</h2>
+        <div>
+          <label className="block text-sm font-medium">Адрес получателя</label>
+          <input
+            required
+            className="mt-1 w-full rounded border px-2 py-1"
+            disabled={submitting}
+            pattern="^5[1-9A-HJ-NP-Za-km-z]{47}$"
+            title="Адрес должен начинаться с «5» и быть 48 символов в диапазоне Base58"
+            type="text"
+            value={toAddress}
+            onChange={e => {
+              setToAddress(e.target.value)
+              setError(undefined)
+            }}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Сумма ({tokenSymbol})</label>
+          <input
+            className="mt-1 w-full rounded border px-2 py-1"
+            disabled={submitting || isEmpty}
+            max={Number(maxBalance) / 10 ** decimals}
+            min={0}
+            step={1 / 10 ** decimals}
+            type="number"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Доступно: {(Number(maxBalance) / 10 ** decimals).toFixed(4)} {tokenSymbol}
+          </p>
+        </div>
+        {error && <div className="text-sm text-red-500">{error}</div>}
+        <button
+          className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
           disabled={submitting}
-          pattern="^5[1-9A-HJ-NP-Za-km-z]{47}$"
-          title="Адрес должен начинаться с «5» и быть 48 символов в диапазоне Base58"
-          type="text"
-          value={toAddress}
-          onChange={e => {
-            setToAddress(e.target.value)
-            setError(undefined)
-          }}
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium">Сумма ({tokenSymbol})</label>
-        <input
-          className="mt-1 w-full rounded border px-2 py-1"
-          disabled={submitting || isEmpty}
-          max={Number(maxBalance) / 10 ** decimals}
-          min={0}
-          step={1 / 10 ** decimals}
-          type="number"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-        />
-        <p className="mt-1 text-xs text-gray-500">
-          Доступно: {(Number(maxBalance) / 10 ** decimals).toString()} {tokenSymbol}
-        </p>
-      </div>
-      {error && <div className="text-sm text-red-500">{error}</div>}
-      <button
-        className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-        disabled={submitting}
-        type="submit"
-      >
-        {submitting ? 'Отправка…' : 'Отправить'}
-      </button>
-    </form>
+          type="submit"
+        >
+          {submitting ? 'Отправка…' : 'Отправить'}
+        </button>
+      </form>
+      {showSuccess && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setShowSuccess(false)}
+        >
+          <div className="rounded-lg bg-white p-6 shadow-lg" onClick={e => e.stopPropagation()}>
+            <p className="text-lg">Перевод отправлен!</p>
+            <button
+              className="mt-4 rounded bg-blue-600 px-4 py-2 text-white"
+              onClick={() => setShowSuccess(false)}
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
