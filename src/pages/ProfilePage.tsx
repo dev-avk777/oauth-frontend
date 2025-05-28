@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const [copySuccess, setCopySuccess] = useState(false)
   const [initial, setInitial] = useState<SubstrateBalance | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // WebSocket balance subscription
   const { current, history, status, tokenSymbol, decimals } = useBalanceWebSocket(user?.publicKey)
@@ -41,6 +42,8 @@ export default function ProfilePage() {
         })
       } catch (error) {
         console.error('Failed to load initial data:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -111,16 +114,20 @@ export default function ProfilePage() {
         </div>
 
         {/* Balance Card */}
-        {user.publicKey && (
-          <div className="mt-6">
-            <BalanceCard
-              current={current ?? initial}
-              decimals={decimals}
-              history={history}
-              status={status}
-              tokenId={tokenSymbol}
-            />
-          </div>
+        {isLoading ? (
+          <div className="text-center">Loading balance...</div>
+        ) : (
+          user.publicKey && (
+            <div className="mt-6">
+              <BalanceCard
+                current={current ?? initial}
+                decimals={decimals}
+                history={history}
+                status={status}
+                tokenId={tokenSymbol}
+              />
+            </div>
+          )
         )}
 
         <div className="mt-6 flex justify-center">
