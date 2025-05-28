@@ -1,12 +1,13 @@
 'use client'
 
+import Opal from '@/assets/components/Opal'
 import { useAuth } from '@/context/AuthContext'
 import { useEffect, useState } from 'react'
+import { FaCheck, FaCopy } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
-import { FaEthereum, FaCopy, FaCheck } from 'react-icons/fa'
 import { getInitialBalance, getSubstrateConfig, type SubstrateBalance } from '../api/substrateApi'
-import { useBalanceWebSocket } from '../hooks/useBalanceWebSocket'
 import { BalanceCard } from '../components/BalanceCard'
+import { useBalanceWebSocket } from '../hooks/useBalanceWebSocket'
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
@@ -75,8 +76,9 @@ export default function ProfilePage() {
           {user.publicKey && (
             <div className="mt-3 flex items-center justify-center space-x-2">
               <div className="flex items-center rounded-lg bg-blue-50 px-3 py-1.5">
-                <FaEthereum className="mr-2 text-blue-500" />
-                <span className="font-mono text-sm" title={user.publicKey}>
+                {/* <FaEthereum className="mr-2 text-blue-500" /> */}
+                <Opal height={20} width={20} />
+                <span className="ml-1 font-mono text-sm" title={user.publicKey}>
                   {user.publicKey.slice(0, 6)}...{user.publicKey.slice(-4)}
                 </span>
               </div>

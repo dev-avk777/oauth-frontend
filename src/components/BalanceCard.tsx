@@ -1,8 +1,8 @@
+import Opal from '@/assets/components/Opal'
+import { formatBalance } from '@polkadot/util'
 import React from 'react'
 import type { SubstrateBalance } from '../api/substrateApi'
 import type { Status } from '../hooks/useBalanceWebSocket'
-import { FaEthereum } from 'react-icons/fa'
-import { formatBalance } from '@polkadot/util'
 
 interface Props {
   current: SubstrateBalance | null
@@ -42,8 +42,9 @@ export const BalanceCard: React.FC<Props> = ({
       <h2 className="mb-2 text-xl font-semibold">Wallet Balance</h2>
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <FaEthereum className="mr-2 text-blue-500" />
-          <span className="text-3xl font-bold">
+          {/* <FaEthereum className="mr-2 text-blue-500" /> */}
+          <Opal height={20} width={20} />
+          <span className="ml-1 text-3xl font-bold">
             {formatBalance(current.balance, { decimals, withUnit: false, forceUnit: tokenId })}
           </span>
         </div>
