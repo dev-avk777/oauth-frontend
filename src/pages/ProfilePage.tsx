@@ -7,6 +7,7 @@ import { FaCheck, FaCopy } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { getInitialBalance, getSubstrateConfig, type SubstrateBalance } from '../api/substrateApi'
 import { BalanceCard } from '../components/BalanceCard'
+import { TransferForm } from '../components/TransferForm'
 import { useBalanceWebSocket } from '../hooks/useBalanceWebSocket'
 
 export default function ProfilePage() {
@@ -120,13 +121,36 @@ export default function ProfilePage() {
           <div className="text-center">Loading balance...</div>
         ) : (
           user.publicKey && (
-            <div className="mt-6">
+            <div className="mt-6 space-y-6">
               <BalanceCard
                 current={current ?? initial}
                 decimals={decimals}
                 history={history}
                 status={status}
                 tokenId={tokenSymbol}
+              />
+
+              {/* Transfer Form */}
+              <TransferForm
+                decimals={decimals}
+                maxBalance={BigInt(current?.balance || initial?.balance || '0')}
+                tokenSymbol={tokenSymbol || 'OPAL'}
+                onSuccess={() => {
+                  // Refresh balance after successful transfer
+                  setIsLoading(true)
+                  getInitialBalance()
+                    .then(bal => {
+                      const plancks = decimals
+                        ? BigInt(Math.round(parseFloat(bal.balance) * 10 ** decimals))
+                        : BigInt(bal.balance)
+                      setInitial({
+                        balance: plancks.toString(),
+                        blockNumber: bal.blockNumber,
+                        timestamp: bal.timestamp,
+                      })
+                    })
+                    .finally(() => setIsLoading(false))
+                }}
               />
             </div>
           )

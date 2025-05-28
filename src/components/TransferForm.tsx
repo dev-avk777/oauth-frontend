@@ -26,12 +26,16 @@ export const TransferForm: React.FC<TransferFormProps> = ({
     }
     return BigInt(Math.floor(num * 10 ** decimals))
   }
-
+  const ss58Pattern = /^5[1-9A-HJ-NP-Za-km-z]{47}$/
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(undefined)
     if (!toAddress) {
       setError('Введите адрес получателя')
+      return
+    }
+    if (!ss58Pattern.test(toAddress)) {
+      setError('Введите корректный SS58-адрес, начинающийся с «5» и длиной 48 символов')
       return
     }
     const valuePlancks = parsePlancks(amount)
@@ -59,25 +63,31 @@ export const TransferForm: React.FC<TransferFormProps> = ({
       setSubmitting(false)
     }
   }
-
+  const isEmpty = maxBalance === BigInt(0)
   return (
     <form className="space-y-4 rounded-lg border bg-gray-50 p-4" onSubmit={handleSubmit}>
       <h2 className="text-lg font-medium">Перевод {tokenSymbol}</h2>
       <div>
         <label className="block text-sm font-medium">Адрес получателя</label>
         <input
+          required
           className="mt-1 w-full rounded border px-2 py-1"
           disabled={submitting}
+          pattern="^5[1-9A-HJ-NP-Za-km-z]{47}$"
+          title="Адрес должен начинаться с «5» и быть 48 символов в диапазоне Base58"
           type="text"
           value={toAddress}
-          onChange={e => setToAddress(e.target.value)}
+          onChange={e => {
+            setToAddress(e.target.value)
+            setError(undefined)
+          }}
         />
       </div>
       <div>
         <label className="block text-sm font-medium">Сумма ({tokenSymbol})</label>
         <input
           className="mt-1 w-full rounded border px-2 py-1"
-          disabled={submitting}
+          disabled={submitting || isEmpty}
           max={Number(maxBalance) / 10 ** decimals}
           min={0}
           step={1 / 10 ** decimals}
