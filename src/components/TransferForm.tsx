@@ -57,7 +57,7 @@ export const TransferForm: React.FC<TransferFormProps> = ({
       if (onSuccess) {
         onSuccess()
       }
-      setTimeout(() => setShowSuccess(true), 0)
+      setTimeout(() => setShowSuccess(true), 5000)
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
