@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -9,9 +10,21 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      buffer: 'buffer/',
     },
   },
-
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          buffer: true,
+        }),
+      ],
+    },
+  },
   // для локальной разработки по http://localhost:3007 или http://172.26.0.4:3007
   server: {
     host: '0.0.0.0',
@@ -31,7 +44,7 @@ export default defineConfig({
     ],
     cors: {
       // CORS-настройки
-      origin: ['https://tokenswallet.ru'],
+      origin: ['http://localhost:5000', 'https://tokenswallet.ru'],
     },
   },
 })

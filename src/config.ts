@@ -1,20 +1,26 @@
-const config = {
-  apiUrl:
-    import.meta.env.MODE === 'production'
-      ? import.meta.env.VITE_AUTH_API_URL || 'https://api.yourdomain.com'
-      : import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5000',
+// src/config.ts
 
-  // Добавляем baseUrl для консистентности
+const apiUrl =
+  import.meta.env.MODE === 'production'
+    ? import.meta.env.VITE_AUTH_API_URL || 'https://backend.tokenswallet.ru'
+    : import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5000'
+
+const config = {
+  apiUrl,
+
   baseUrl:
     import.meta.env.MODE === 'production'
-      ? import.meta.env.VITE_FRONTEND_URL || 'https://yourdomain.com'
+      ? import.meta.env.VITE_FRONTEND_URL || 'https://tokenswallet.ru'
       : import.meta.env.VITE_FRONTEND_URL || window.location.origin,
 
-  // Флаг для определения продакшен-режима
   isProduction: import.meta.env.MODE === 'production',
-
-  // Для работы в Docker - установлено в false для локальной разработки
   inDocker: false,
+
+  substrate: {
+    balanceEndpoint: `${apiUrl}/substrate/balance`,
+    configEndpoint: `${apiUrl}/substrate/config`,
+    rpcUrl: import.meta.env.VITE_SUBSTRATE_WS || 'wss://rpc-opal.unique.network',
+  },
 }
 
 export default config

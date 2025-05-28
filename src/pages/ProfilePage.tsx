@@ -4,31 +4,47 @@ import { useAuth } from '@/context/AuthContext'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaEthereum, FaCopy, FaCheck } from 'react-icons/fa'
+import {
+  getInitialBalance,
+  getSubstrateConfig,
+  type SubstrateBalance,
+  type SubstrateConfig,
+} from '../api/substrateApi'
+import { useBalanceWebSocket } from '../hooks/useBalanceWebSocket'
+import { BalanceCard } from '../components/BalanceCard'
 
 export default function ProfilePage() {
-  const { user, logout /* createKey, getUserKeys, signTx, getBalance, ethereumKeys */ } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [copySuccess, setCopySuccess] = useState(false)
-  // const [showCreateKey, setShowCreateKey] = useState(false)
-  // const [showSignTx, setShowSignTx] = useState(false)
-  // const [selectedKeyId, setSelectedKeyId] = useState('')
-  // const [balances, setBalances] = useState<Record<string, string>>({})
-  // const [txData, setTxData] = useState({ to: '', value: '' })
-  // const [signedTx, setSignedTx] = useState<string | null>(null)
-  // const [loading, setLoading] = useState(false)
+  const [initial, setInitial] = useState<SubstrateBalance | null>(null)
+  const [tokenConfig, setTokenConfig] = useState<SubstrateConfig | null>(null)
+
+  // WebSocket balance subscription
+  const { current, history, status } = useBalanceWebSocket(user?.publicKey)
 
   useEffect(() => {
     if (!user) {
       navigate('/')
+      return
     }
-    // TODO: when backend ready, load keys:
-    // getUserKeys().then(keys => {/* set state */})
-  }, [user, navigate /*, getUserKeys */])
 
-  // TODO: stubbed until backend implements:
-  // const fetchBalances = async (keys: any[]) => { /* ... */ }
-  // const handleCreateKey = async () => { /* createKey(); ... */ }
-  // const handleSignTransaction = async (e: React.FormEvent) => { /* ... */ }
+    // Load initial balance and config
+    const loadData = async () => {
+      try {
+        const [balanceData, configData] = await Promise.all([
+          getInitialBalance(),
+          getSubstrateConfig(),
+        ])
+        setInitial(balanceData)
+        setTokenConfig(configData)
+      } catch (error) {
+        console.error('Failed to load initial data:', error)
+      }
+    }
+
+    loadData()
+  }, [user, navigate])
 
   // Function to copy Ethereum address to clipboard
   const copyToClipboard = (text: string) => {
@@ -37,7 +53,6 @@ export default function ProfilePage() {
     setTimeout(() => setCopySuccess(false), 2000)
   }
 
-  console.log(user)
   if (!user) {
     return null
   }
@@ -94,41 +109,17 @@ export default function ProfilePage() {
           </span>
         </div>
 
-        {/* Ethereum keys section (commented until backend ready)
-        <div className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center text-xl font-semibold">
-              <FaEthereum className="mr-2 text-blue-500" /> Your Ethereum Keys
-            </h2>
-            <button
-              onClick={() => setShowCreateKey(true)}
-              className="flex items-center rounded-full bg-blue-100 p-1.5 text-blue-600 hover:bg-blue-200"
-            >
-              <FaPlus />
-            </button>
+        {/* Balance Card */}
+        {user.publicKey && (
+          <div className="mt-6">
+            <BalanceCard
+              current={current ?? initial}
+              history={history}
+              status={status}
+              tokenId={tokenConfig?.tokenId}
+            />
           </div>
-          {loading ? (
-            <div>Loading keys...</div>
-          ) : (
-            <div>
-              {ethereumKeys.length === 0 ? (
-                <div>You don't have any Ethereum keys yet.</div>
-              ) : (
-                ethereumKeys.map(key => (
-                  <div key={key.id} className="p-4 border rounded">
-                    <p>Key: {key.id.slice(0, 8)}...</p>
-                    <p>Address: {key.address}</p>
-                    <p>Balance: {balances[key.address] || '0'} ETH</p>
-                    <button onClick={() => { setSelectedKeyId(key.id); setShowSignTx(true) }}>
-                      <FaSignature /> Sign
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-        */}
+        )}
 
         <div className="mt-6 flex justify-center">
           <button
