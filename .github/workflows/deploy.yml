@@ -57,6 +57,7 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
           VITE_FRONTEND_URL: ${{ secrets.VITE_FRONTEND_URL }}
+          VITE_SUBSTRATE_WS:     ${{ secrets.VITE_SUBSTRATE_WS }}
 
       - name: Build Docker image
         run: docker build -t oauth-frontend:latest .
