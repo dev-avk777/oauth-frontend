@@ -4,12 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaEthereum, FaCopy, FaCheck } from 'react-icons/fa'
-import {
-  getInitialBalance,
-  getSubstrateConfig,
-  type SubstrateBalance,
-  type SubstrateConfig,
-} from '../api/substrateApi'
+import { getInitialBalance, getSubstrateConfig, type SubstrateBalance } from '../api/substrateApi'
 import { useBalanceWebSocket } from '../hooks/useBalanceWebSocket'
 import { BalanceCard } from '../components/BalanceCard'
 
@@ -18,10 +13,9 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const [copySuccess, setCopySuccess] = useState(false)
   const [initial, setInitial] = useState<SubstrateBalance | null>(null)
-  const [tokenConfig, setTokenConfig] = useState<SubstrateConfig | null>(null)
 
   // WebSocket balance subscription
-  const { current, history, status } = useBalanceWebSocket(user?.publicKey)
+  const { current, history, status, tokenSymbol, decimals } = useBalanceWebSocket(user?.publicKey)
 
   useEffect(() => {
     if (!user) {
@@ -29,15 +23,22 @@ export default function ProfilePage() {
       return
     }
 
-    // Load initial balance and config
     const loadData = async () => {
       try {
-        const [balanceData, configData] = await Promise.all([
-          getInitialBalance(),
-          getSubstrateConfig(),
-        ])
-        setInitial(balanceData)
-        setTokenConfig(configData)
+        // загружаем конфиг только локально
+        const cfg = await getSubstrateConfig()
+
+        // загружаем начальный баланс и приводим в планки
+        const bal = await getInitialBalance()
+        const plancks = cfg.useBalances
+          ? BigInt(Math.round(parseFloat(bal.balance) * 10 ** cfg.decimals))
+          : BigInt(bal.balance)
+
+        setInitial({
+          balance: plancks.toString(),
+          blockNumber: bal.blockNumber,
+          timestamp: bal.timestamp,
+        })
       } catch (error) {
         console.error('Failed to load initial data:', error)
       }
@@ -114,9 +115,10 @@ export default function ProfilePage() {
           <div className="mt-6">
             <BalanceCard
               current={current ?? initial}
+              decimals={decimals}
               history={history}
               status={status}
-              tokenId={tokenConfig?.tokenId}
+              tokenId={tokenSymbol}
             />
           </div>
         )}

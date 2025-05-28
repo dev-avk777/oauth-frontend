@@ -11,6 +11,7 @@ export interface SubstrateConfig {
   tokenId: string
   useBalances: boolean
   ss58Prefix: number
+  decimals: number
 }
 
 /**

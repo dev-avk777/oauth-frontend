@@ -2,15 +2,23 @@ import React from 'react'
 import type { SubstrateBalance } from '../api/substrateApi'
 import type { Status } from '../hooks/useBalanceWebSocket'
 import { FaEthereum } from 'react-icons/fa'
+import { formatBalance } from '@polkadot/util'
 
 interface Props {
   current: SubstrateBalance | null
   history: SubstrateBalance[]
   status: Status
   tokenId?: string
+  decimals?: number
 }
 
-export const BalanceCard: React.FC<Props> = ({ current, history, status, tokenId = 'OPAL' }) => {
+export const BalanceCard: React.FC<Props> = ({
+  current,
+  history,
+  status,
+  tokenId = 'OPAL',
+  decimals = 12,
+}) => {
   const statusColors = {
     online: 'bg-green-500',
     reconnecting: 'bg-yellow-400 animate-pulse',
@@ -36,7 +44,7 @@ export const BalanceCard: React.FC<Props> = ({ current, history, status, tokenId
         <div className="flex items-center">
           <FaEthereum className="mr-2 text-blue-500" />
           <span className="text-3xl font-bold">
-            {parseFloat(current.balance).toFixed(4)} {tokenId}
+            {formatBalance(current.balance, { decimals, withUnit: false, forceUnit: tokenId })}
           </span>
         </div>
         <div className={`h-3 w-3 rounded-full ${statusColors[status]}`} />
@@ -58,7 +66,7 @@ export const BalanceCard: React.FC<Props> = ({ current, history, status, tokenId
               className="flex justify-between border-t border-gray-100 py-1 text-sm text-gray-600"
             >
               <span>
-                {parseFloat(current.balance).toFixed(4)} {tokenId}
+                {formatBalance(item.balance, { decimals, withUnit: false, forceUnit: tokenId })}
               </span>
               {item.blockNumber && <span>#{item.blockNumber}</span>}
               {item.timestamp && <span>{new Date(item.timestamp).toLocaleTimeString()}</span>}

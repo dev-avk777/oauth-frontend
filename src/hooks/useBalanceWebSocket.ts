@@ -5,16 +5,21 @@ import type { SubstrateBalance } from '../api/substrateApi'
 
 export type Status = 'online' | 'reconnecting' | 'error'
 
-/**
- * Подписка на изменения баланса Substrate-аккаунта.
- *
- * @param accountId SS58-адрес пользователя (строка, не undefined)
- * @param maxHistory максимальное число записей истории
- */
-export function useBalanceWebSocket(accountId?: string, maxHistory = 50) {
+export function useBalanceWebSocket(
+  accountId?: string,
+  maxHistory = 50
+): {
+  current: SubstrateBalance | null
+  history: SubstrateBalance[]
+  status: Status
+  decimals: number
+  tokenSymbol: string
+} {
   const [current, setCurrent] = useState<SubstrateBalance | null>(null)
   const [history, setHistory] = useState<SubstrateBalance[]>([])
   const [status, setStatus] = useState<Status>('reconnecting')
+  const [decimals, setDecimals] = useState<number>(0)
+  const [tokenSymbol, setTokenSymbol] = useState<string>('')
 
   useEffect(() => {
     if (!accountId) {
@@ -36,7 +41,13 @@ export function useBalanceWebSocket(accountId?: string, maxHistory = 50) {
         const provider = new WsProvider(config.substrate.rpcUrl)
         api = await ApiPromise.create({ provider })
 
-        // Один раз получаем текущее состояние
+        // Достаём decimals и символ токена из метаданных цепочки
+        const chainDecimals = api.registry.chainDecimals[0]
+        const chainTokens = api.registry.chainTokens[0] || ''
+        setDecimals(chainDecimals)
+        setTokenSymbol(chainTokens)
+
+        // Начальное состояние
         const acctRaw = await api.query.system.account(accountId)
         const acct: any = acctRaw
         const initBalance = acct.data.free.toString()
@@ -55,7 +66,7 @@ export function useBalanceWebSocket(accountId?: string, maxHistory = 50) {
         lastBlock = initBlock
         setStatus('online')
 
-        // Подписываемся на изменения
+        // Подписка на изменения
         const sub: any = await api.query.system.account(accountId, async (info: any) => {
           const balance = info.data.free.toString()
           const hdr = await api.rpc.chain.getHeader()
@@ -82,17 +93,14 @@ export function useBalanceWebSocket(accountId?: string, maxHistory = 50) {
           setCurrent(payload)
           setHistory(h => [payload, ...h].slice(0, maxHistory))
         })
-
-        // Готовим функцию отписки
         unsubscribe = () => {
           try {
             sub()
           } catch (e) {
-            console.warn('unsubscribe error', e)
+            console.warn('Failed to unsubscribe from balance updates', e)
           }
         }
 
-        // Слушаем события провайдера
         provider.on('connected', () => setStatus('online'))
         provider.on('disconnected', () => setStatus('reconnecting'))
         provider.on('error', () => setStatus('error'))
@@ -110,5 +118,5 @@ export function useBalanceWebSocket(accountId?: string, maxHistory = 50) {
     }
   }, [accountId, maxHistory])
 
-  return { current, history, status }
+  return { current, history, status, decimals, tokenSymbol }
 }
