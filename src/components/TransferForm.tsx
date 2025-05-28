@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react'
+import React, { useState, useEffect, type FormEvent } from 'react'
 import { transferTokens } from '../api/substrateApi'
 
 interface TransferFormProps {
@@ -20,6 +20,14 @@ export const TransferForm: React.FC<TransferFormProps> = ({
   const [submitting, setSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    if (showSuccess) {
+      timer = setTimeout(() => setShowSuccess(false), 5000) // Автозакрытие через 5 секунд
+    }
+    return () => clearTimeout(timer) // Очистка таймера при размонтировании
+  }, [showSuccess])
+
   const parsePlancks = (amt: string): bigint => {
     const num = parseFloat(amt)
     if (isNaN(num)) {
@@ -27,6 +35,7 @@ export const TransferForm: React.FC<TransferFormProps> = ({
     }
     return BigInt(Math.floor(num * 10 ** decimals))
   }
+
   const ss58Pattern = /^5[1-9A-HJ-NP-Za-km-z]{47}$/
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -57,17 +66,14 @@ export const TransferForm: React.FC<TransferFormProps> = ({
       if (onSuccess) {
         onSuccess()
       }
-      setTimeout(() => setShowSuccess(true), 5000)
+      setShowSuccess(true) // Показываем модалку сразу
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Произошла ошибка при переводе')
-      }
+      setError(err instanceof Error ? err.message : 'Произошла ошибка при переводе')
     } finally {
       setSubmitting(false)
     }
   }
+
   const isEmpty = maxBalance === BigInt(0)
   return (
     <>
