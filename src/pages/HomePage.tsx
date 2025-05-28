@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { FcGoogle } from 'react-icons/fc'
@@ -14,6 +14,13 @@ export default function HomePage() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+
+  // ❶ Переносим редирект в эффект
+  useEffect(() => {
+    if (user) {
+      navigate('/profile')
+    }
+  }, [user, navigate])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,9 +40,8 @@ export default function HomePage() {
     }
   }
 
-  // If user is already logged in, redirect to profile
+  // Убираем редирект из рендеринга
   if (user) {
-    navigate('/profile')
     return null
   }
 
