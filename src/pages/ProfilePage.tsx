@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-8">
-      <h1 className="text-3xl font-bold">Ethereum Key Vault</h1>
+      <h1 className="text-3xl font-bold">Substrate Key Vault</h1>
       <div className="w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-lg">
         <div className="text-center">
           <p className="text-2xl font-semibold">

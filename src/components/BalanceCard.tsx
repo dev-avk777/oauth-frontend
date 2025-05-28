@@ -45,7 +45,8 @@ export const BalanceCard: React.FC<Props> = ({
           {/* <FaEthereum className="mr-2 text-blue-500" /> */}
           <Opal height={20} width={20} />
           <span className="ml-1 text-3xl font-bold">
-            {formatBalance(current.balance, { decimals, withUnit: false, forceUnit: tokenId })}
+            {formatBalance(current.balance, { decimals, withUnit: false, forceUnit: tokenId })}{' '}
+            {tokenId}
           </span>
         </div>
         <div className={`h-3 w-3 rounded-full ${statusColors[status]}`} />
@@ -67,7 +68,8 @@ export const BalanceCard: React.FC<Props> = ({
               className="flex justify-between border-t border-gray-100 py-1 text-sm text-gray-600"
             >
               <span>
-                {formatBalance(item.balance, { decimals, withUnit: false, forceUnit: tokenId })}
+                {formatBalance(item.balance, { decimals, withUnit: false, forceUnit: tokenId })}{' '}
+                {tokenId}
               </span>
               {item.blockNumber && <span>#{item.blockNumber}</span>}
               {item.timestamp && <span>{new Date(item.timestamp).toLocaleTimeString()}</span>}
